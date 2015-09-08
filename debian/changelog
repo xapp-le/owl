@@ -1,0 +1,5 @@
+bootloader-atm7059a (0.20150803) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Ying-Chun Liu (PaulLiu) <paulliu@debian.org>  Mon, 03 Aug 2015 01:28:44 +0800

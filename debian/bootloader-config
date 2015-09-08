@@ -1,0 +1,10 @@
+ARCH=arm
+KERNEL_DTS=actduino_bubble_gum_sdboot
+KERNEL_DEFCONFIG=actduino_bubble_gum_linux_defconfig
+UBOOT_DEFCONFIG=actduino_bubble_gum_v10_defconfig
+
+MISC_IMAGE_SIZE=48
+
+IC_NAME=s500
+OS_NAME=linux
+BOARD_NAME=bubble_gum_sd

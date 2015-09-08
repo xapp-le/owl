@@ -1,0 +1,13 @@
+Source: bootloader-atm7059a
+Section: non-free/admin
+Priority: optional
+Maintainer: Ying-Chun Liu (PaulLiu) <paulliu@debian.org>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.6
+Homepage: http://localhost
+
+Package: bootloader-atm7059a
+Architecture: all
+Depends: ${misc:Depends}
+Description: non-free bootloader for atm7059a
+ A binary blob for pre-bootloader
