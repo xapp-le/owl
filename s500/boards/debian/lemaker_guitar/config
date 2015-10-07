@@ -1,0 +1,8 @@
+ARCH=arm
+KERNEL_DTS=lemaker_guitar
+KERNEL_DEFCONFIG=actduino_s500_linux_defconfig
+UBOOT_DEFCONFIG=lemaker_guitar_defconfig
+
+MISC_IMAGE_SIZE=48
+
+

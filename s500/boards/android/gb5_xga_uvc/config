@@ -1,0 +1,8 @@
+ARCH=arm
+KERNEL_DTS=actduino_s500_lcd_768x1024_uvc
+KERNEL_DEFCONFIG=actduino_s500_defconfig
+UBOOT_DEFCONFIG=actduino_s500_v11_defconfig
+
+MISC_IMAGE_SIZE=48
+RECOVERY_IMAGE_SIZE=48
+
