@@ -31,6 +31,10 @@ elif [ "$BUILD_MODULE" = "rootfs" ]; then
 	cd $TOP_DIR/owl
 	make rootfs
 
+elif [ "$BUILD_MODULE" = "distclean" ]; then
+	cd $TOP_DIR/owl
+	make distclean
+
 else
 	cd $TOP_DIR/owl
 	make
