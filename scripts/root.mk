@@ -36,7 +36,14 @@ CARD_BURN_KERNEL_OUT_DIR=$(CARD_BURN_DIR)/kernel
 UBOOT_OUT_DIR=$(OUT_DIR)/u-boot
 K_BLD_CONFIG=$(KERNEL_OUT_DIR)/.config
 
-CROSS_COMPILE=$(TOP_DIR)/../toolchain/arm-linux-gnueabihf/bin/arm-linux-gnueabihf-
+ifneq "$(findstring ARM, $(shell grep -m 1 'model name.*: ARM' /proc/cpuinfo))" ""
+  BOOTLOADER_PACK=bootloader_pack.arm
+  CROSS_COMPILE=
+else
+  BOOTLOADER_PACK=bootloader_pack
+  CROSS_COMPILE=arm-linux-gnueabihf-
+endif
+
 export PATH:=$(TOOLS_DIR)/utils:$(PATH)
 
 DATE_STR=$(shell date +%y%m%d)
@@ -71,7 +78,7 @@ u-boot:
 
 bootloader:
 	$(Q)mkdir -p $(BOOTLOAD_DIR)
-	$(Q)cd $(TOOLS_DIR)/utils && ./bootloader_pack $(TOP_DIR)/$(IC_NAME)/bootloader/bootloader.bin $(BOARD_CONFIG_DIR)/bootloader.ini $(BOOTLOAD_DIR)/bootloader.bin
+	$(Q)cd $(TOOLS_DIR)/utils && ./$(BOOTLOADER_PACK) $(TOP_DIR)/$(IC_NAME)/bootloader/bootloader.bin $(BOARD_CONFIG_DIR)/bootloader.ini $(BOOTLOAD_DIR)/bootloader.bin
 
 misc: initramfs
 	$(Q)echo "-- Build Fat Misc image --"
