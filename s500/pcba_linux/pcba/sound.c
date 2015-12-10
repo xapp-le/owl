@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include "encoderpp.h"
 #include "case.h"
+#include <unistd.h>
+#include <stdlib.h>
 #include <pthread.h>
 
 #ifndef __GS702C__
@@ -70,31 +72,26 @@ enum mixer_config{
 static int set_mixer_int_value(int card, int id, int value)
 {
 	struct mixer *mixer;
-    struct mixer_ctl *ctl;
-    unsigned int num_ctl_values;
-    unsigned int i;
-	
+	struct mixer_ctl *ctl;
+	unsigned int num_ctl_values;
+	unsigned int i;
+
 	mixer = mixer_open(card);
-	if (!mixer) 
-	{
+	if (!mixer) {
 		fprintf(stderr, "Failed to open mixer\n");
 		return -1;
 	}
 	
-    ctl = mixer_get_ctl(mixer, id);
-    if (!ctl) 
-	{
-        fprintf(stderr, " mixer_get_ctl:Invalid mixer control\n");
-		mixer_close(mixer);
-        return -1;
-    }
-
-    num_ctl_values = mixer_ctl_get_num_values(ctl);
+	ctl = mixer_get_ctl(mixer, id);
+	if (!ctl) {
+		fprintf(stderr, " mixer_get_ctl:Invalid mixer control\n");
+			mixer_close(mixer);
+		return -1;
+	}
+	num_ctl_values = mixer_ctl_get_num_values(ctl);
 		/* Set all values the same */
-	for (i = 0; i < num_ctl_values; i++) 
-	{
-		if (mixer_ctl_set_value(ctl, i, value)) 
-		{
+	for (i = 0; i < num_ctl_values; i++) {
+		if (mixer_ctl_set_value(ctl, i, value)) {
 			fprintf(stderr, "id = %d,mixer_ctl_set_value error: Invalid value\n",id);
 			mixer_close(mixer);
 			return -1;
@@ -111,25 +108,22 @@ static int set_mixer_enum_value(int card, int id, char *string)
 	struct mixer_ctl *ctl;
 
 	mixer = mixer_open(card);
-	if (!mixer) 
-	{
+	if (!mixer) {
 		fprintf(stderr, "Failed to open mixer\n");
 		return -1;
 	}
 
 	ctl = mixer_get_ctl(mixer, id);
-    if (!ctl) 
-	{
-        fprintf(stderr, " mixer_get_ctl:Invalid mixer control\n");
-		mixer_close(mixer);
-        return -1;
-    }
+	if (!ctl) {
+		fprintf(stderr, " mixer_get_ctl:Invalid mixer control\n");
+			mixer_close(mixer);
+		return -1;
+	}
 	
-	if (mixer_ctl_set_enum_by_string(ctl, string))
-	{
+	if (mixer_ctl_set_enum_by_string(ctl, string)){
 		fprintf(stderr, "mixer_ctl_set_enum_by_string error: invalid enum value\n");
 		mixer_close(mixer);
-        return -1;
+		return -1;
 	}
 	mixer_close(mixer);
 	return 0;
@@ -137,12 +131,6 @@ static int set_mixer_enum_value(int card, int id, char *string)
 
 static int init_mixer_to_i2s(int card)
 { 
-//	set_mixer_int_value(card, DUMMY_MIC_GAIN, 7);
-//	set_mixer_int_value(card, DUMMY_EARPHONE_GAIN, 190);  
-//	set_mixer_int_value(card, DUMMY_SPEAKER_GAIN, 170); 	 
-//	set_mixer_int_value(card, DUMMY_SPEAKER_VOL, 40); 
-//	set_mixer_int_value(card, DUMMY_EARPHONE_VOL, 40); 
-//	set_mixer_int_value(card, DUMMY_MIC_NUM, 1);
 	set_mixer_int_value(card, ADC0_GAIN, 9); 
 	set_mixer_int_value(card, AMP1_GAIN_BOOST_RANGE, 3);
 	set_mixer_int_value(card, ADC0_DIGIT_GAIN_CTR, 0);
@@ -164,12 +152,10 @@ static int init_mixer_to_i2s(int card)
 	set_mixer_int_value(card, AOUT_MIXER_FM_SWITCH, 0);
 	set_mixer_enum_value(card, AUDIO_OUTPUT_MODE, "i2s"); 
 	
-	if (headphone_flg)
-	{
+	if (headphone_flg){
 		set_mixer_int_value(card, SPEAKER_SWITCH, 0);
 	}
-	else
-	{
+	else{
 		set_mixer_int_value(card, SPEAKER_SWITCH, 1);
 	}
 	
@@ -222,13 +208,6 @@ static int init_mixer_to_hdmi(int card)
 */
 static int init_mixer_to_cap(int card)
 { 
- 
-//	set_mixer_int_value(card, DUMMY_MIC_GAIN, 7); 
-//	set_mixer_int_value(card, DUMMY_EARPHONE_GAIN, 190);  
-//	set_mixer_int_value(card, DUMMY_SPEAKER_GAIN, 170);  
-//	set_mixer_int_value(card, DUMMY_SPEAKER_VOL, 40);   
-//	set_mixer_int_value(card, DUMMY_EARPHONE_VOL, 40); 
-//	set_mixer_int_value(card, DUMMY_MIC_NUM, 1);
 	set_mixer_int_value(card, ADC0_GAIN, 7); //10
 	set_mixer_int_value(card, AMP1_GAIN_BOOST_RANGE, 7); 
 	set_mixer_int_value(card, ADC0_DIGIT_GAIN_CTR, 3);  // 8 
@@ -259,56 +238,55 @@ static int init_mixer_to_cap(int card)
 static struct pcm *create_pcm_in(unsigned int card, unsigned int device,
                             unsigned int channels, unsigned int rate, int bits)
 {
-    struct pcm_config config;
-    struct pcm *pcm;
-	
-    config.channels = channels;
-    config.rate = rate;
-    config.period_size = 1024;
-    config.period_count = 4; 
-    config.start_threshold = 0;
-    config.stop_threshold = 0;
-    config.silence_threshold = 0;
+	struct pcm_config config;
+	struct pcm *pcm;
+
+	config.channels = channels;
+	config.rate = rate;
+	config.period_size = 1024;
+	config.period_count = 4; 
+	config.start_threshold = 0;
+	config.stop_threshold = 0;
+	config.silence_threshold = 0;
 
 	if (bits == 32)
-        config.format = PCM_FORMAT_S32_LE;
-    else if (bits == 16)
-        config.format = PCM_FORMAT_S16_LE;
+		config.format = PCM_FORMAT_S32_LE;
+	else if (bits == 16)
+		config.format = PCM_FORMAT_S16_LE;
 
-	
-
-    pcm = pcm_open(card, device, PCM_IN, &config);
-    if (!pcm || !pcm_is_ready(pcm)) {
-        fprintf(stderr, "Unable to open PCM_IN device[C%dD%d] (%s)\n",card, device,
-                pcm_get_error(pcm));
-        return NULL;
-    } 
+	pcm = pcm_open(card, device, PCM_IN, &config);
+	if (!pcm || !pcm_is_ready(pcm)) {
+		fprintf(stderr, "Unable to open PCM_IN device[C%dD%d] (%s)\n",card, device,
+			pcm_get_error(pcm));
+		pcm_close(pcm);
+		return NULL;
+	} 
 	return pcm;
 } 
 
 static struct pcm *create_pcm_out(unsigned int card, unsigned int device,
 	unsigned int channels, unsigned int rate, int bits)
 { 
-    struct pcm_config config;  
+	struct pcm_config config;  
 	struct pcm *pcm;
-    config.channels = channels;
-    config.rate = rate;
-    config.period_size = 1024;
-    config.period_count = 4;   
- 								  
-    if (bits == 32)
-        config.format = PCM_FORMAT_S32_LE;
-    else if (bits == 16)
-        config.format = PCM_FORMAT_S16_LE;
-    config.start_threshold = 0;
-    config.stop_threshold = 0;
-    config.silence_threshold = 0;
+	config.channels = channels;
+	config.rate = rate;
+	config.period_size = 1024;
+	config.period_count = 4;   
+								  
+	if (bits == 32)
+		config.format = PCM_FORMAT_S32_LE;
+	else if (bits == 16)
+		config.format = PCM_FORMAT_S16_LE;
+	config.start_threshold = 0;
+	config.stop_threshold = 0;
+	config.silence_threshold = 0;
 	pcm = pcm_open(card, device, PCM_OUT, &config);
-	if (!pcm || !pcm_is_ready(pcm))
-	{
-    	fprintf(stderr, "Unable to open PCM_OUT device[C%dD%d] (%s)\n",card, device,
-            pcm_get_error(pcm));
-    	return NULL;
+	if (!pcm || !pcm_is_ready(pcm)){
+		fprintf(stderr, "Unable to open PCM_OUT device[C%dD%d] (%s)\n",card, device,
+		    pcm_get_error(pcm));
+		pcm_close(pcm);
+		return NULL;
 	}  
 	return pcm;
 }
@@ -316,23 +294,19 @@ static struct pcm *create_pcm_out(unsigned int card, unsigned int device,
 void pcm_cleanup()
 {
 	printf("pcm_cleanup\n");
-	if (pcm)
-	{
+	if (pcm){
 		printf("close pcm\n");
 		pcm_close(pcm);
 		pcm = NULL;
 	}
 
-	if (pcm_in)
-	{
+	if (pcm_in){
 		printf("close pcm_in\n");
 		pcm_close(pcm_in);
 		pcm_in = NULL;
 	
 	}
-	
-	if (pcm_hdmi)
-	{
+	if (pcm_hdmi){
 		printf("close pcm_hdmi\n");
 		pcm_close(pcm_hdmi);
 		pcm_hdmi = NULL;
@@ -354,10 +328,6 @@ void check_output_mode(void)
 			init_mixer_to_hdmi(0);
 			if (!pcm_hdmi)
 			{
-#ifdef __GS705A__
-			system("echo 0 > /sys/class/graphics/fb0/mirror_to_hdmi");
-			system("echo 1 > /sys/class/graphics/fb0/mirror_to_hdmi");
-#endif
 				pcm_hdmi = create_pcm_out(0, 1, 2, 44100, 16);
 			}
 			
@@ -365,13 +335,11 @@ void check_output_mode(void)
 		else
 		{
 			printf("switch output mode to i2s\n");
-#ifdef __GS900A__
 			if (pcm_hdmi)
 			{
 				pcm_close(pcm_hdmi);
 				pcm_hdmi = NULL;
 			}
-#endif
 			init_mixer_to_i2s(0);
 		}
 	}
@@ -463,33 +431,25 @@ static int music_play()
 			break;
 		}
 		/*to change data type from 16bits to 32 bits*/ 
-			//first to check if headphone or something else change before write pcm
 		for(i=0; i<num_read/2; i++) 
 		{
 			buffer_i[i] = ((unsigned int)buffer_s[i]) << 16;
 		} 
 		
 		refresh_mixer_to_play();
-	
-		if (hdmi_flg)
+		if (hdmi_flg && pcm_hdmi)
 		{	
-			if (pcm_hdmi)
-			{
-				if (pcm_write(pcm_hdmi, buffer_i, num_read*2))	
-				{			
-					printf("Error pcm hdmi write:%s\n",strerror(errno));			
-				}	
-			}	
-		}			
-		else	
-		{		
-			if (pcm)
-			{
-				if (pcm_write(pcm, buffer_i, num_read*2)) 
-				{						
-					printf("Error pcm write:%s\n",strerror(errno));				
-				}	
+			if (pcm_write(pcm_hdmi, buffer_i, num_read*2))	
+			{			
+				printf("Error pcm hdmi write:%s\n",strerror(errno));			
 			}
+		}			
+		if (!hdmi_flg && pcm)	
+		{		
+			if (pcm_write(pcm, buffer_i, num_read*2)) 
+			{						
+				printf("Error pcm write:%s\n",strerror(errno));				
+			}	
 		}
 	}
 	fclose(file);
@@ -528,10 +488,6 @@ static int sample_play(char *filename)
 		init_mixer_to_hdmi(0);
 		if (!pcm_hdmi)
 		{
-#ifdef __GS705A__
-		system("echo 0 > /sys/class/graphics/fb0/mirror_to_hdmi");
-		system("echo 1 > /sys/class/graphics/fb0/mirror_to_hdmi");
-#endif
 			pcm_hdmi = create_pcm_out(0, 1, 2, 44100, 16);
 		}
 
@@ -543,38 +499,34 @@ static int sample_play(char *filename)
 	}
 	
 	/*  frames = period_size*period_count,
-       buffer_bytes = frames * (bits>>3) * channel  */
-    size = 4096; 
-	
-    buffer = (unsigned char *)malloc(size);
-    if (!buffer) 
+	buffer_bytes = frames * (bits>>3) * channel  */
+	size = 4096; 
+
+	buffer = (unsigned char *)malloc(size);
+	if (!buffer) 
 	{
-        fprintf(stderr, "Unable to allocate %d bytes\n", size); 
+	fprintf(stderr, "Unable to allocate %d bytes\n", size); 
 		return -1;
-    } 					//send buffer pointer
+	} 					//send buffer pointer
 
 	while((num_read = fread(buffer, 1, size, file)))
 	{  
 		refresh_mixer_to_play();
 		
-		if (hdmi_flg)		
+		if (hdmi_flg && pcm_hdmi)		
 		{			
-			if (pcm_hdmi)
+			
+			if (pcm_write(pcm_hdmi, buffer, num_read))
 			{
-				if (pcm_write(pcm_hdmi, buffer, num_read))
-				{
-					printf("Error pcm hdmi write:%s\n",strerror(errno));
-				}
+				printf("Error pcm hdmi write:%s\n",strerror(errno));
 			}
+
 		}
-		else
+		if (!hdmi_flg && pcm)
 		{
-			if (pcm)
+			if (pcm_write(pcm, buffer, num_read))
 			{
-				if (pcm_write(pcm, buffer, num_read))
-				{
-					printf("Error pcm write:%s\n",strerror(errno));
-				}
+				printf("Error pcm write:%s\n",strerror(errno));
 			}
 		}
 
@@ -591,10 +543,10 @@ static int sample_play(char *filename)
 static int sample_capture(char *filename, void *arg)
 {  
 	FILE *file = NULL;
-    unsigned int card = 0;
-    unsigned int device = 0;
-    unsigned int channels = 2;
-    unsigned int rate = 44100;     
+	unsigned int card = 0;
+	unsigned int device = 0;
+	unsigned int channels = 2;
+	unsigned int rate = 44100;     
 	int bits = 16;
 	
 	IDirectFBSurface *surface = arg;

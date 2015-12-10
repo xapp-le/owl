@@ -43,6 +43,9 @@ ota:
 	$(Q)cp $(PRODUCT_OUT)/*.zip $(IMAGE_DIR)/
 	$(Q)cp $(PRODUCT_OUT)/obj/PACKAGING/target_files_intermediates/*.zip $(IMAGE_DIR)/
 
+initramfs:
+	echo ""
+
 rootfs: system recovery misc ota
 
 rootfs_clean:
