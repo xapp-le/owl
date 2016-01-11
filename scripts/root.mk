@@ -33,6 +33,7 @@ CARD_BURN_UDISK_DIR=$(CARD_BURN_DIR)/card_burn_udsik
 CARD_BURN_IMAGE=$(CARD_BURN_DIR)/card_burn_image
 KERNEL_OUT_DIR=$(OUT_DIR)/kernel
 CARD_BURN_KERNEL_OUT_DIR=$(CARD_BURN_DIR)/kernel
+INSTALL_MOD_PATH=output
 UBOOT_OUT_DIR=$(OUT_DIR)/u-boot
 K_BLD_CONFIG=$(KERNEL_OUT_DIR)/.config
 
@@ -49,7 +50,7 @@ export PATH:=$(TOOLS_DIR)/utils:$(PATH)
 DATE_STR=$(shell date +%y%m%d)
 FW_NAME=$(IC_NAME)_$(OS_NAME)_$(BOARD_NAME)_$(DATE_STR)
 
-all: burn kernel modules u-boot rootfs firmware md5sum burn_card
+all: burn kernel modules modules_install u-boot rootfs firmware md5sum burn_card
 
 burn:
 	$(Q)$(MAKE) -C $(BURN_SRC) CROSS_COMPILE=$(CROSS_COMPILE) all
@@ -66,6 +67,10 @@ kernel: $(K_BLD_CONFIG)
 modules: $(K_BLD_CONFIG)
 	$(Q)mkdir -p $(KERNEL_OUT_DIR)
 	$(Q)$(MAKE) -C $(KERNEL_SRC) CROSS_COMPILE=$(CROSS_COMPILE) ARCH=$(ARCH) O=$(KERNEL_OUT_DIR) -j$(CPUS) modules
+
+modules_install: $(K_BLD_CONFIG)
+	$(Q)$(MAKE) -C $(KERNEL_SRC) CROSS_COMPILE=$(CROSS_COMPILE) ARCH=$(ARCH) O=$(KERNEL_OUT_DIR) -j$(CPUS) INSTALL_MOD_PATH=$(INSTALL_MOD_PATH) modules_install
+	$(Q)cd $(KERNEL_OUT_DIR)/$(INSTALL_MOD_PATH) && tar czf modules.tgz lib
 
 kernel-config: $(K_BLD_CONFIG)
 	$(Q)$(MAKE) -C $(KERNEL_SRC) ARCH=$(ARCH) O=$(KERNEL_OUT_DIR) menuconfig
@@ -135,6 +140,7 @@ burn_card: $(BURN_UDISK_SIZE)
 firmware: bootloader misc recovery 
 	$(Q)mkdir -p $(BURN_DIR)
 	$(Q)cp $(BURN_SRC)/burn.bin $(BURN_DIR)/
+	$(Q)cp $(KERNEL_OUT_DIR)/$(INSTALL_MOD_PATH)/modules.tgz $(BURN_DIR)/
 	$(Q)cp $(UBOOT_OUT_DIR)/u-boot-dtb.img $(IMAGE_DIR)/
 	$(Q)cp $(BOOTLOAD_DIR)/bootloader.bin $(IMAGE_DIR)/
 	
