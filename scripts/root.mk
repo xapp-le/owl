@@ -142,7 +142,12 @@ firmware: bootloader misc recovery
 	$(Q)cp $(BURN_SRC)/burn.bin $(BURN_DIR)/
 	$(Q)cp $(UBOOT_OUT_DIR)/u-boot-dtb.img $(IMAGE_DIR)/
 	$(Q)cp $(BOOTLOAD_DIR)/bootloader.bin $(IMAGE_DIR)/
-	
+
+	$(Q)cp $(KERNEL_OUT_DIR)/arch/$(ARCH)/boot/uImage $(BURN_DIR)
+	$(Q)cp $(KERNEL_OUT_DIR)/arch/$(ARCH)/boot/dts/$(KERNEL_DTS).dtb $(BURN_DIR)/kernel.dtb
+	$(Q)cp $(UBOOT_OUT_DIR)/u-boot-dtb.img $(BURN_DIR)/
+	$(Q)cp $(BOOTLOAD_DIR)/bootloader.bin $(BURN_DIR)/
+
 	$(Q)cp $(BOARD_CONFIG_DIR)/partition.cfg $(SCRIPT_DIR)/partition.cfg
 	$(Q)python $(SCRIPT_DIR)/partition_create.py $(SCRIPT_DIR)/partition.cfg  $(SCRIPT_DIR)/partition_tmp.cfg
 	$(Q)sed -i 's/\\boardname\\/\\$(IC_NAME)_$(OS_NAME)_$(BOARD_NAME)\\/' $(SCRIPT_DIR)/partition_tmp.cfg
