@@ -4,4 +4,5 @@ KERNEL_DEFCONFIG=actduino_s500_defconfig
 UBOOT_DEFCONFIG=actduino_s500_v12_defconfig
 
 MISC_IMAGE_SIZE=48
-
+#unit:lba size:4G
+BURN_UDISK_SIZE=8388608
